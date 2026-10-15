@@ -17,6 +17,14 @@ android {
         versionCode = 2000
         versionName = "2.0.0"
 
+        // Ship only the 64-bit ARM native libraries.
+        ndk {
+            abiFilters += listOf("arm64-v8a")
+        }
+
+        // Keep the default English resources in the APK.
+        resourceConfigurations += listOf("en")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -46,10 +54,9 @@ android {
             manifestPlaceholders["renderer"] = "MobileGlues:libmobileglues.so:libmobileglues.so"
 
             manifestPlaceholders["minMCVer"] = "1.17"
-            manifestPlaceholders["maxMCVer"] = "" //为空则不限制 No restriction if empty
+            manifestPlaceholders["maxMCVer"] = "" // No restriction if empty
 
-            // MG_COUNT_LAUNCH：只有经启动器起来的这一次才算「一次启动」。
-            // 基准测试、各种工具、以及本插件自己 dlopen 一次去读 GL 信息，都不该计数。
+            // Count only launches initiated by a launcher.
             manifestPlaceholders["boatEnv"] = mutableMapOf<String,String>().apply {
                 put("LIBGL_ES", "3")
                 put("MG_COUNT_LAUNCH", "1")
@@ -63,8 +70,8 @@ android {
             manifestPlaceholders["pojavEnv"] = mutableMapOf<String,String>().apply {
                 put("LIBGL_ES", "3")
                 put("POJAV_RENDERER", "opengles3")
-				put("POJAVEXEC_EGL", "libmobileglues.so")
-				put("LIBGL_EGL", "libmobileglues.so")
+                put("POJAVEXEC_EGL", "libmobileglues.so")
+                put("LIBGL_EGL", "libmobileglues.so")
                 put("MG_COUNT_LAUNCH", "1")
             }.run {
                 var env = ""
@@ -114,7 +121,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.documentfile)
     implementation(libs.miuix.ui)
-    // 协程和 lifecycleScope 以前是从 appcompat 传递依赖里蹭来的，这里显式声明。
+    // Explicit coroutine and lifecycle dependencies.
     implementation(libs.coroutines.android)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(project(":MobileGlues"))
